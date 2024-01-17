@@ -1,95 +1,113 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
 
+import Card from '@mui/material/Card';
+import * as React from 'react';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import dayjs from 'dayjs';
+import { Dayjs } from 'dayjs';
+import Button from '@mui/material/Button';
+import CheckBoxOutlined from '@mui/icons-material/CheckBoxOutlined';
+import { Send } from '@mui/icons-material';
+
+
+class EventType {
+  name: string;
+  isGood: boolean | null;
+  constructor(name: string, isGood: boolean) {
+    this.name = name;
+    this.isGood = isGood;
+  }
+}
+const eventTypes: EventType[] = [
+  {
+    "name": "Bought Starbucks",
+    "isGood": false
+  },
+  {
+    "name": "Morning Walk",
+    "isGood": true
+  },
+  {
+    "name": "Cooked Lunch",
+    "isGood": true
+  },
+  {
+    "name": "Ordered Lunch (delivery)",
+    "isGood": false
+  },
+  {
+    "name": "Ordered Lunch (takeout)",
+    "isGood": false
+  },
+  {
+    "name": "Cooked Dinner",
+    "isGood": true
+  },
+  {
+    "name": "Ordered Dinner (delivery)",
+    "isGood": false
+  },
+  {
+    "name": "Ordered Dinner (takeout)",
+    "isGood": false
+  },
+  {
+    "name": "Went to Gym",
+    "isGood": true
+  },
+  {
+    "name": "Weighed in",
+    "isGood": null
+  }
+]
 export default function Home() {
+  const [eventType, setEventType] = React.useState<string>('');
+  const [date, setDate] = React.useState<Dayjs | null>(dayjs());
+
+  const handleChange = (event: SelectChangeEvent) => {
+    setEventType(event.target.value as string);
+  };
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+      <main className={`container-lg text-center`}>
+        <h1 className='mb-2 mt-3'>ジョジョのGoal Tracker</h1>
+        <Card variant="outlined" className={`mt-3 mb-3 p-3`}>
+          <FormControl fullWidth>
+            <InputLabel id="event-type">Event Type</InputLabel>
+            <Select
+              labelId="event-type"
+              id="event-type-select"
+              value={eventType}
+              onChange={handleChange}
+              className={``}
+            >
+              {eventTypes.map((eventType: EventType) => (
+                <MenuItem key={eventType.name} value={eventType.name}>{eventType.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+
+            <DatePicker
+              className={`mt-3 mb-3`}
+              label="Event Date"
+              value={date}
+              onChange={(newValue) => setDate(newValue)}
             />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+          </FormControl>
+          <FormControl fullWidth>
+            <Button variant="contained" color='success' endIcon={<Send />}>
+              Submit Event
+            </Button>
+          </FormControl>
+        </Card>
+      </main>
+    </LocalizationProvider>
   )
 }
