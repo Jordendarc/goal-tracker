@@ -11,26 +11,25 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs';
 import { Dayjs } from 'dayjs';
 import Button from '@mui/material/Button';
-import CheckBoxOutlined from '@mui/icons-material/CheckBoxOutlined';
 import { Send } from '@mui/icons-material';
+import Link from 'next/link';
 
-
-class EventType {
+interface EventType {
   name: string;
   isGood: boolean | null;
-  constructor(name: string, isGood: boolean) {
-    this.name = name;
-    this.isGood = isGood;
-  }
+  eventDate?: string | null;
+  additionalInfo?: string[] | null;
 }
 const eventTypes: EventType[] = [
   {
     "name": "Bought Starbucks",
-    "isGood": false
+    "isGood": false,
+    "additionalInfo": ["price"]
   },
   {
     "name": "Morning Walk",
-    "isGood": true
+    "isGood": true,
+    "additionalInfo": ["distance", "time"]
   },
   {
     "name": "Cooked Lunch",
@@ -38,11 +37,13 @@ const eventTypes: EventType[] = [
   },
   {
     "name": "Ordered Lunch (delivery)",
-    "isGood": false
+    "isGood": false,
+    "additionalInfo": ["price"]
   },
   {
     "name": "Ordered Lunch (takeout)",
-    "isGood": false
+    "isGood": false,
+    "additionalInfo": ["price"]
   },
   {
     "name": "Cooked Dinner",
@@ -50,11 +51,13 @@ const eventTypes: EventType[] = [
   },
   {
     "name": "Ordered Dinner (delivery)",
-    "isGood": false
+    "isGood": false,
+    "additionalInfo": ["price"]
   },
   {
     "name": "Ordered Dinner (takeout)",
-    "isGood": false
+    "isGood": false,
+    "additionalInfo": ["price"]
   },
   {
     "name": "Went to Gym",
@@ -62,51 +65,144 @@ const eventTypes: EventType[] = [
   },
   {
     "name": "Weighed in",
-    "isGood": null
+    "isGood": null,
+    "additionalInfo": ["weight", "waist"]
+  },
+  {
+    "name": "At home ab day (10+ min)",
+    "isGood": true
+  },
+  {
+    "name": "At yoga / stretching (10+ min)",
+    "isGood": true
   }
 ]
 export default function Home() {
   const [eventType, setEventType] = React.useState<string>('');
   const [date, setDate] = React.useState<Dayjs | null>(dayjs());
+  const [currentEvents, setCurrentEvents] = React.useState([]);
 
   const handleChange = (event: SelectChangeEvent) => {
     setEventType(event.target.value as string);
   };
+  const handleGet = async () => {
+    try {
+      const response = await fetch('/api/event', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const result = await response.json();
+      setCurrentEvents(result)
+      console.log(result);  // Handle success
+    } catch (error) {
+      console.error('Failed to create user:', error);  // Handle errors
+    }
+  }
+  const handleSubmit = async () => {
+    console.log('submitting', eventType, date)
+    try {
+      const additionalInfo = eventTypes.find((et: EventType) => et.name === eventType)?.additionalInfo
+      const additionalInfoJson: any = {}
+      if (additionalInfo) {
+        additionalInfo.forEach((info: string) => {
+          additionalInfoJson[info] = 'test'
+        })
+      }
+      const response = await fetch('/api/event', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          eventType, date, isGood: eventTypes.find((et: EventType) => et.name === eventType)?.isGood,
+          additionalInfo: additionalInfoJson
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const result = await response.json();
+      console.log(result);  // Handle success
+    } catch (error) {
+      console.error('Failed to create user:', error);  // Handle errors
+    }
+  }
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
 
       <main className={`container-lg text-center`}>
         <h1 className='mb-2 mt-3'>ジョジョのGoal Tracker</h1>
-        <Card variant="outlined" className={`mt-3 mb-3 p-3`}>
-          <FormControl fullWidth>
-            <InputLabel id="event-type">Event Type</InputLabel>
-            <Select
-              labelId="event-type"
-              id="event-type-select"
-              value={eventType}
-              onChange={handleChange}
-              className={``}
-            >
-              {eventTypes.map((eventType: EventType) => (
-                <MenuItem key={eventType.name} value={eventType.name}>{eventType.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-
-            <DatePicker
-              className={`mt-3 mb-3`}
-              label="Event Date"
-              value={date}
-              onChange={(newValue) => setDate(newValue)}
-            />
-          </FormControl>
-          <FormControl fullWidth>
-            <Button variant="contained" color='success' endIcon={<Send />}>
-              Submit Event
+        <div className='row'>
+          <Link href={'week'}>
+            <Button className='col' variant="contained" color='info' endIcon={<Send />}>
+              Week View
             </Button>
-          </FormControl>
+          </Link>
+
+        </div>
+        <Card variant="outlined" className={`mt-3 mb-3 p-3`}>
+          <form>
+            <FormControl fullWidth>
+              <InputLabel id="event-type">Event Type</InputLabel>
+              <Select
+                labelId="event-type"
+                id="event-type-select"
+                value={eventType}
+                onChange={handleChange}
+                className={``}
+              >
+                {eventTypes.map((eventType: EventType) => (
+                  <MenuItem key={eventType.name} value={eventType.name}>{eventType.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+
+              <DatePicker
+                className={`mt-3 mb-3`}
+                label="Event Date"
+                value={date}
+                onChange={(newValue) => setDate(newValue)}
+              />
+            </FormControl>
+            <FormControl fullWidth>
+              <Button onClick={handleSubmit} variant="contained" color='success' endIcon={<Send />}>
+                Submit Event
+              </Button>
+            </FormControl>
+            <FormControl fullWidth>
+              <Button onClick={handleGet} variant="contained" color='info' endIcon={<Send />}>
+                Get Events
+              </Button>
+            </FormControl>
+          </form>
         </Card>
+        {currentEvents.length > 0 &&
+          <Card variant="outlined" className={`mt-3 mb-3 p-3`}>
+            <h2>Current Events</h2>
+            <div className='row'>
+              {currentEvents.map((event: any) => (
+                <div key={event.id} className='col-12 col-sm-6 col-md-4 mb-2' style={{
+                  border: '1px solid black',
+                  borderRadius: '5px',
+                  backgroundColor: event.isgood ? '#90EE90' : '#d8504d'
+                }}>
+                  <h3>{event.name}</h3>
+                  <h5>{dayjs(event.eventdate).format('MM/DD/YYYY')}</h5>
+                </div>
+              ))}
+            </div>
+          </Card>
+        }
       </main>
     </LocalizationProvider>
   )
