@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { BarChart } from '@mui/x-charts/BarChart';
 import dayjs from 'dayjs';
 import Card from '@mui/material/Card';
+import { CircularProgress } from '@mui/material';
 
 interface Series {
     data: number[];
@@ -71,6 +72,9 @@ const BarChartComponent = () => {
 
     return (
         <div>
+            {!loaded &&
+                <CircularProgress />
+            }
             {loaded &&
                 <div>
 
@@ -80,9 +84,9 @@ const BarChartComponent = () => {
                         height={window.innerHeight * 0.6}
                         xAxis={[{ scaleType: "band", data: pastSevenDays }]}
                         series={[
-                            { ...series.goodSeries, stack: 'total' },
-                            { ...series.badSeries, stack: 'total' },
-                            { ...series.infoSeries, stack: 'total' },
+                            { ...series.goodSeries, stack: 'total', color: '#0e7f81' },
+                            { ...series.badSeries, stack: 'total', color: '#d8504d' },
+                            { ...series.infoSeries, stack: 'total', color: '#6e5f57' },
 
                         ]}>
                     </BarChart>

@@ -1,1 +1,5 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
+a {
+    color: inherit !important;
+    text-decoration: none !important;
+}

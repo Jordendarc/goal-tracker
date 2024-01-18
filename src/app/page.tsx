@@ -13,6 +13,8 @@ import { Dayjs } from 'dayjs';
 import Button from '@mui/material/Button';
 import { Send } from '@mui/icons-material';
 import Link from 'next/link';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
 interface EventType {
   name: string;
@@ -79,6 +81,8 @@ const eventTypes: EventType[] = [
 ]
 export default function Home() {
   const [eventType, setEventType] = React.useState<string>('');
+  const [loading, setLoading] = React.useState<boolean>(false);
+
   const [date, setDate] = React.useState<Dayjs | null>(dayjs());
   const [currentEvents, setCurrentEvents] = React.useState([]);
 
@@ -86,6 +90,7 @@ export default function Home() {
     setEventType(event.target.value as string);
   };
   const handleGet = async () => {
+    setLoading(true)
     try {
       const response = await fetch('/api/event', {
         method: 'GET',
@@ -100,12 +105,14 @@ export default function Home() {
 
       const result = await response.json();
       setCurrentEvents(result)
-      console.log(result);  // Handle success
+      console.log(result);
     } catch (error) {
-      console.error('Failed to create user:', error);  // Handle errors
+      console.error('Failed to create user:', error);
     }
+    setLoading(false)
   }
   const handleSubmit = async () => {
+    setLoading(true)
     console.log('submitting', eventType, date)
     try {
       const additionalInfo = eventTypes.find((et: EventType) => et.name === eventType)?.additionalInfo
@@ -132,23 +139,22 @@ export default function Home() {
 
       const result = await response.json();
       console.log(result);  // Handle success
+      setLoading(false)
     } catch (error) {
       console.error('Failed to create user:', error);  // Handle errors
+      setLoading(false)
     }
   }
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
 
       <main className={`container-lg text-center`}>
-        <h1 className='mb-2 mt-3'>ジョジョのGoal Tracker</h1>
-        <div className='row'>
-          <Link href={'week'}>
-            <Button className='col' variant="contained" color='info' endIcon={<Send />}>
-              Week View
-            </Button>
-          </Link>
-
-        </div>
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
         <Card variant="outlined" className={`mt-3 mb-3 p-3`}>
           <form>
             <FormControl fullWidth>
@@ -175,12 +181,14 @@ export default function Home() {
               />
             </FormControl>
             <FormControl fullWidth>
-              <Button onClick={handleSubmit} variant="contained" color='success' endIcon={<Send />}>
+              <Button disabled={loading} onClick={handleSubmit} variant="contained" color='success' endIcon={
+                <Send />
+              }>
                 Submit Event
               </Button>
             </FormControl>
             <FormControl fullWidth>
-              <Button onClick={handleGet} variant="contained" color='info' endIcon={<Send />}>
+              <Button disabled={loading} onClick={handleGet} variant="contained" color='info' endIcon={<Send />}>
                 Get Events
               </Button>
             </FormControl>
@@ -204,6 +212,6 @@ export default function Home() {
           </Card>
         }
       </main>
-    </LocalizationProvider>
+    </LocalizationProvider >
   )
 }
