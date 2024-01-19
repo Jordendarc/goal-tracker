@@ -41,12 +41,14 @@ const BarChartComponent = () => {
                 data: [],
                 label: 'Info Events',
             };
-            const res = await fetch('/api/event')
+            const today = dayjs().format('YYYY-MM-DD');
+            const aWeekAgo = dayjs().subtract(7, 'days').format('YYYY-MM-DD');
+            const res = await fetch(`/api/event?startDate=${aWeekAgo}&endDate=${today}`)
             const response = await res.json()
             for (const day of pastSevenDays) {
                 console.log(`checking ${day}`)
                 const dayEvents = response.filter((event: any) => {
-                    console.log(`does ${dayjs(event.eventdate).format('MM/DD/YYYY')} match ${day} ? ${dayjs(event.date).format('MM/DD/YYYY') === day ? 'yes' : 'no'}}`)
+                    console.log(`does ${dayjs(event.eventdate).format('MM/DD/YYYY')} match ${day} ? ${dayjs(event.eventdate).format('MM/DD/YYYY') === day ? 'yes' : 'no'}}`)
                     return dayjs(event.eventdate).format('MM/DD/YYYY') === day;
                 });
                 const goodEvents = dayEvents.filter((event: any) => {

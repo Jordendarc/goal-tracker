@@ -17,16 +17,22 @@ const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
     const pool = createPool({
         connectionString: process.env.DATABASE_URL,
     });
-
+    let query = `select * from goal_events`
+    if(req.query.startDate){
+        query += ` where eventdate >= $1`
+    }
+    if(req.query.endDate){
+        query += ` and eventdate <= $2`
+    }
     // Get a client from the pool
     const client = await pool.connect();
-    const query = await client.query(`
-                select * from goal_events
-            `);
     console.log('query', query);
+
+    const queryResult = await client.query(query, [req.query.startDate, req.query.endDate]);
+    console.log('query', queryResult.rows);
     // Release the client back to the pool
     client.release();
-    return res.status(200).json(query.rows);
+    return res.status(200).json(queryResult.rows);
 };
 
 const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
