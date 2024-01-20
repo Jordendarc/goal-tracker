@@ -42,6 +42,9 @@ const NavBar = () => {
                             <ListItem onClick={() => setIsDrawerOpen(false)}>
                                 <Link href={'/week'}><ListItemText primary="Week View" /></Link>
                             </ListItem>
+                            <ListItem onClick={() => setIsDrawerOpen(false)}>
+                                <Link href={'/calendar'}><ListItemText primary="Calendar View" /></Link>
+                            </ListItem>
                         </List>
                     </Drawer>
                 </Toolbar>

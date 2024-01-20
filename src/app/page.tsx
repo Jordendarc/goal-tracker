@@ -12,7 +12,6 @@ import dayjs from 'dayjs';
 import { Dayjs } from 'dayjs';
 import Button from '@mui/material/Button';
 import { Send } from '@mui/icons-material';
-import Link from 'next/link';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
@@ -105,7 +104,7 @@ export default function Home() {
 
       const result = await response.json();
       setCurrentEvents(result)
-      console.log(result);
+      // console.log(result);
     } catch (error) {
       console.error('Failed to create user:', error);
     }
@@ -113,7 +112,7 @@ export default function Home() {
   }
   const handleSubmit = async () => {
     setLoading(true)
-    console.log('submitting', eventType, date)
+    // console.log('submitting', eventType, date)
     try {
       const additionalInfo = eventTypes.find((et: EventType) => et.name === eventType)?.additionalInfo
       const additionalInfoJson: any = {}
@@ -138,10 +137,10 @@ export default function Home() {
       }
 
       const result = await response.json();
-      console.log(result);  // Handle success
+      // console.log(result);  // Handle success
       setLoading(false)
     } catch (error) {
-      console.error('Failed to create user:', error);  // Handle errors
+      // console.error('Failed to create user:', error);  // Handle errors
       setLoading(false)
     }
   }

@@ -24,25 +24,17 @@ const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
     if(req.query.endDate){
         query += ` and eventdate <= $2`
     }
-    // Get a client from the pool
     const client = await pool.connect();
-    console.log('query', query);
-
     const queryResult = await client.query(query, [req.query.startDate, req.query.endDate]);
-    console.log('query', queryResult.rows);
-    // Release the client back to the pool
     client.release();
     return res.status(200).json(queryResult.rows);
 };
 
 const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-        // Create a connection pool
         const pool = createPool({
             connectionString: process.env.DATABASE_URL,
         });
-
-        // Get a client from the pool
         const client = await pool.connect();
         const eventType = req.body.eventType;
         const date = req.body.date;
@@ -55,9 +47,8 @@ const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
             VALUES ($1, $2, $3, $4)
         `, [eventType, date, isGood, additionalInfo]);
         console.log('inserted into table');
-        // Release the client back to the pool
         client.release();
-        res.status(200).json({ message: 'User created successfully' });
+        res.status(200).json({ message: 'Event created successfully' });
     } catch (error: any) {
         console.log(error);
         res.status(500).json({ error: error.message });

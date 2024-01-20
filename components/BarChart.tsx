@@ -22,10 +22,10 @@ const BarChartComponent = () => {
     for (let i = 0; i < 7; i++) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
-        pastSevenDays.unshift(dayjs(date).format('MM/DD/YYYY'));
+        pastSevenDays.unshift(dayjs(date).format('YYYY-MM-DD'));
     }
 
-    console.log(pastSevenDays);
+    // console.log(pastSevenDays);
 
     useEffect(() => {
         async function fetchData() {
@@ -46,10 +46,10 @@ const BarChartComponent = () => {
             const res = await fetch(`/api/event?startDate=${aWeekAgo}&endDate=${today}`)
             const response = await res.json()
             for (const day of pastSevenDays) {
-                console.log(`checking ${day}`)
+                // console.log(`checking ${day}`)
                 const dayEvents = response.filter((event: any) => {
-                    console.log(`does ${dayjs(event.eventdate).format('MM/DD/YYYY')} match ${day} ? ${dayjs(event.eventdate).format('MM/DD/YYYY') === day ? 'yes' : 'no'}}`)
-                    return dayjs(event.eventdate).format('MM/DD/YYYY') === day;
+                    // console.log(`does ${event.eventdate.substring(0, 10)} match ${day} ? ${event.eventdate.substring(0, 10) === day ? 'yes' : 'no'}}`)
+                    return event.eventdate.substring(0, 10) === day;
                 });
                 const goodEvents = dayEvents.filter((event: any) => {
                     return event.isgood === true;
@@ -64,7 +64,7 @@ const BarChartComponent = () => {
                 badSeries.data.push(badEvents.length);
                 infoSeries.data.push(infoEvents.length);
             }
-            console.log(response, goodSeries, badSeries, infoSeries)
+            // console.log(response, goodSeries, badSeries, infoSeries)
             setSeries({ goodSeries, badSeries, infoSeries })
             setData(response)
             setLoaded(true)
