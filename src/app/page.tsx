@@ -14,6 +14,10 @@ import Button from '@mui/material/Button';
 import { Send } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
+import EventItem from '../../components/EventItem';
+import Alert from '@mui/material/Alert';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface EventType {
   name: string;
@@ -81,6 +85,7 @@ const eventTypes: EventType[] = [
 export default function Home() {
   const [eventType, setEventType] = React.useState<string>('');
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [apiData, setApiData] = React.useState<any>(null);
 
   const [date, setDate] = React.useState<Dayjs | null>(dayjs());
   const [currentEvents, setCurrentEvents] = React.useState([]);
@@ -97,22 +102,18 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
       });
-
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-
       const result = await response.json();
       setCurrentEvents(result)
-      // console.log(result);
     } catch (error) {
-      console.error('Failed to create user:', error);
+      console.error('failed getting data', error);
     }
     setLoading(false)
   }
   const handleSubmit = async () => {
     setLoading(true)
-    // console.log('submitting', eventType, date)
     try {
       const additionalInfo = eventTypes.find((et: EventType) => et.name === eventType)?.additionalInfo
       const additionalInfoJson: any = {}
@@ -133,17 +134,17 @@ export default function Home() {
       });
 
       if (!response.ok) {
+        setApiData({ status: 'danger', message: `Event: "${eventType}" created unsuccessfully!` })
         throw new Error('Network response was not ok');
       }
-
       const result = await response.json();
-      // console.log(result);  // Handle success
+      setApiData({ status: 'success', message: `Event: "${eventType}" created successfully!` })
       setLoading(false)
     } catch (error) {
-      // console.error('Failed to create user:', error);  // Handle errors
       setLoading(false)
     }
   }
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
 
@@ -155,6 +156,11 @@ export default function Home() {
           <CircularProgress color="inherit" />
         </Backdrop>
         <Card variant="outlined" className={`mt-3 mb-3 p-3`}>
+          {apiData &&
+            <Alert className='mb-3' icon={apiData.status === 'success' ? <CheckIcon fontSize="inherit" /> : <CloseIcon fontSize="inherit" />} severity={apiData.status}>
+              {apiData.message}
+            </Alert>
+          }
           <form>
             <FormControl fullWidth>
               <InputLabel id="event-type">Event Type</InputLabel>
@@ -179,14 +185,14 @@ export default function Home() {
                 onChange={(newValue) => setDate(newValue)}
               />
             </FormControl>
-            <FormControl fullWidth>
+            <FormControl>
               <Button disabled={loading} onClick={handleSubmit} variant="contained" color='success' endIcon={
                 <Send />
               }>
                 Submit Event
               </Button>
             </FormControl>
-            <FormControl fullWidth>
+            <FormControl>
               <Button disabled={loading} onClick={handleGet} variant="contained" color='info' endIcon={<Send />}>
                 Get Events
               </Button>
@@ -198,14 +204,7 @@ export default function Home() {
             <h2>Current Events</h2>
             <div className='row'>
               {currentEvents.map((event: any) => (
-                <div key={event.id} className='col-12 col-sm-6 col-md-4 mb-2' style={{
-                  border: '1px solid black',
-                  borderRadius: '5px',
-                  backgroundColor: event.isgood ? '#90EE90' : '#d8504d'
-                }}>
-                  <h3>{event.name}</h3>
-                  <h5>{dayjs(event.eventdate).format('MM/DD/YYYY')}</h5>
-                </div>
+                <EventItem key={event.id} event={event} refresh={handleGet}/>
               ))}
             </div>
           </Card>

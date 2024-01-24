@@ -1,5 +1,5 @@
 'use server'
-import { createPool } from '@vercel/postgres';
+import { Query, createPool } from '@vercel/postgres';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -13,21 +13,31 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 };
 const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
-    // Create a connection pool
-    const pool = createPool({
-        connectionString: process.env.DATABASE_URL,
-    });
-    let query = `select * from goal_events`
-    if(req.query.startDate){
-        query += ` where eventdate >= $1`
+    try {
+        const pool = createPool({
+            connectionString: process.env.DATABASE_URL,
+        });
+        let query = `select * from goal_events`
+        if (req.query.startDate) {
+            query += ` where eventdate >= $1`
+        }
+        if (req.query.endDate) {
+            query += ` and eventdate <= $2`
+        }
+        query += ` order by eventdate desc`
+        const client = await pool.connect();
+        let queryResult
+        if (!req.query.startDate && !req.query.endDate) {
+            queryResult = await client.query(query);
+        } else {
+            queryResult = await client.query(query, [req.query.startDate, req.query.endDate]);
+        }
+        client.release();
+        return res.status(200).json(queryResult.rows);
+    } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({ error: error.message });
     }
-    if(req.query.endDate){
-        query += ` and eventdate <= $2`
-    }
-    const client = await pool.connect();
-    const queryResult = await client.query(query, [req.query.startDate, req.query.endDate]);
-    client.release();
-    return res.status(200).json(queryResult.rows);
 };
 
 const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -40,13 +50,10 @@ const handlePost = async (req: NextApiRequest, res: NextApiResponse) => {
         const date = req.body.date;
         const isGood = req.body.isGood;
         const additionalInfo = req.body.additionalInfo;
-
-        console.log('dont create table if not exists');
         await client.query(`
             INSERT INTO goal_events(name, eventDate, isGood,additionalInfo)
             VALUES ($1, $2, $3, $4)
         `, [eventType, date, isGood, additionalInfo]);
-        console.log('inserted into table');
         client.release();
         res.status(200).json({ message: 'Event created successfully' });
     } catch (error: any) {

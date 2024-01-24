@@ -5,6 +5,7 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import dayjs from 'dayjs';
 import Card from '@mui/material/Card';
 import { CircularProgress } from '@mui/material';
+import EventItem from './EventItem';
 
 interface Series {
     data: number[];
@@ -24,54 +25,50 @@ const BarChartComponent = () => {
         date.setDate(date.getDate() - i);
         pastSevenDays.unshift(dayjs(date).format('YYYY-MM-DD'));
     }
-
-    // console.log(pastSevenDays);
-
     useEffect(() => {
-        async function fetchData() {
-            const goodSeries: Series = {
-                data: [],
-                label: 'Good Events',
-            };
-            const badSeries: Series = {
-                data: [],
-                label: 'Bad Events',
-            };
-            const infoSeries: Series = {
-                data: [],
-                label: 'Info Events',
-            };
-            const today = dayjs().format('YYYY-MM-DD');
-            const aWeekAgo = dayjs().subtract(7, 'days').format('YYYY-MM-DD');
-            const res = await fetch(`/api/event?startDate=${aWeekAgo}&endDate=${today}`)
-            const response = await res.json()
-            for (const day of pastSevenDays) {
-                // console.log(`checking ${day}`)
-                const dayEvents = response.filter((event: any) => {
-                    // console.log(`does ${event.eventdate.substring(0, 10)} match ${day} ? ${event.eventdate.substring(0, 10) === day ? 'yes' : 'no'}}`)
-                    return event.eventdate.substring(0, 10) === day;
-                });
-                const goodEvents = dayEvents.filter((event: any) => {
-                    return event.isgood === true;
-                });
-                const badEvents = dayEvents.filter((event: any) => {
-                    return event.isgood === false;
-                });
-                const infoEvents = dayEvents.filter((event: any) => {
-                    return event.isgood === null;
-                });
-                goodSeries.data.push(goodEvents.length);
-                badSeries.data.push(badEvents.length);
-                infoSeries.data.push(infoEvents.length);
-            }
-            // console.log(response, goodSeries, badSeries, infoSeries)
-            setSeries({ goodSeries, badSeries, infoSeries })
-            setData(response)
-            setLoaded(true)
-        }
-        fetchData();
+        getLastSevenDays()
     }, []);
-
+    const getLastSevenDays = async () => {
+        const goodSeries: Series = {
+            data: [],
+            label: 'Good Events',
+        };
+        const badSeries: Series = {
+            data: [],
+            label: 'Bad Events',
+        };
+        const infoSeries: Series = {
+            data: [],
+            label: 'Info Events',
+        };
+        const today = dayjs().format('YYYY-MM-DD');
+        const aWeekAgo = dayjs().subtract(7, 'days').format('YYYY-MM-DD');
+        const res = await fetch(`/api/event?startDate=${aWeekAgo}&endDate=${today}`)
+        const response = await res.json()
+        for (const day of pastSevenDays) {
+            const dayEvents = response.filter((event: any) => {
+                return event.eventdate.substring(0, 10) === day;
+            });
+            const goodEvents = dayEvents.filter((event: any) => {
+                return event.isgood === true;
+            });
+            const badEvents = dayEvents.filter((event: any) => {
+                return event.isgood === false;
+            });
+            const infoEvents = dayEvents.filter((event: any) => {
+                return event.isgood === null;
+            });
+            goodSeries.data.push(goodEvents.length);
+            badSeries.data.push(badEvents.length);
+            infoSeries.data.push(infoEvents.length);
+        }
+        setSeries({ goodSeries, badSeries, infoSeries })
+        setData(response)
+        setLoaded(true)
+    }
+    const setItemData = (d: any) => {
+        console.log(d)
+    }
     return (
         <div>
             {!loaded &&
@@ -79,7 +76,7 @@ const BarChartComponent = () => {
             }
             {loaded &&
                 <div>
-
+                    {/* TODO: watch for mui x charts next version to implement on click https://github.com/mui/mui-x/pull/11411 */}
                     <BarChart
                         className='w-100'
                         width={window.innerWidth * 0.9}
@@ -98,14 +95,7 @@ const BarChartComponent = () => {
                                 <h2>Current Events</h2>
                                 <div className='row'>
                                     {data.map((event: any) => (
-                                        <div key={event.id} className='col-12 col-sm-6 col-md-4 mb-2' style={{
-                                            border: '1px solid black',
-                                            borderRadius: '5px',
-                                            backgroundColor: event.isgood ? '#90EE90' : '#d8504d'
-                                        }}>
-                                            <h3>{event.name}</h3>
-                                            <h5>{dayjs(event.eventdate).format('MM/DD/YYYY')}</h5>
-                                        </div>
+                                        <EventItem key={event.id} event={event} refresh={getLastSevenDays}/>
                                     ))}
                                 </div>
                             </Card>
