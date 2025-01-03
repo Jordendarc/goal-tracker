@@ -1,4 +1,4 @@
-import BarChartComponent from "../../../components/BarChart";
+import BarChartComponent from "../../components/BarChart";
 
 export default function Week() {
 

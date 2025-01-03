@@ -14,10 +14,10 @@ import Button from '@mui/material/Button';
 import { Send } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
-import EventItem from '../../components/EventItem';
 import Alert from '@mui/material/Alert';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import EventItem from '../components/EventItem';
 
 interface EventType {
   name: string;
