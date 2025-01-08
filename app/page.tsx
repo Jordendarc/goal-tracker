@@ -18,6 +18,7 @@ import Alert from '@mui/material/Alert';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import EventItem from '../components/EventItem';
+import { useSession } from "next-auth/react"
 
 interface EventType {
   name: string;
@@ -83,6 +84,9 @@ const eventTypes: EventType[] = [
   }
 ]
 export default function Home() {
+  const { data: session, status } = useSession();
+
+  console.log(session, status)
   const [eventType, setEventType] = React.useState<string>('');
   const [loading, setLoading] = React.useState<boolean>(false);
   const [apiData, setApiData] = React.useState<any>(null);

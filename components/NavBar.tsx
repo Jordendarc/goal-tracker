@@ -12,6 +12,8 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Link from 'next/link';
+import { SignInButton } from './auth/AuthButtons';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const NavBar = () => {
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
@@ -33,6 +35,7 @@ const NavBar = () => {
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         ジョジョのGoal Tracker
                     </Typography>
+                    <SignInButton />
                     <Drawer open={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
                         <List className={``}>
                             <ListItem onClick={() => setIsDrawerOpen(false)}>
