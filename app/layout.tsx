@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import * as React from 'react';
 import { Suspense } from 'react'
-import AuthProvider from './AuthProvider';
+import AuthProvider from '../components/auth/AuthProvider';
 import NavBar from '../components/NavBar';
 import LoadingOnNav from '../components/LoadingOnNav';
 
